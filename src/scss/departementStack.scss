@@ -163,6 +163,8 @@
   & .margin {
     height: 100%;
     width: 25%;
+    @include backgroundChange(rgba(180, 180, 180, 0.568));
+    animation-name: backgroundChange;
   }
 
   .departement-title {
@@ -227,8 +229,14 @@
             width: 40px;
             position: relative;
             cursor: pointer;
+
+            &:hover {
+              color: #4fc3f7;
+            }
+
             &:hover .help-content {
               display: block;
+              color: black;
             }
 
             & .help-content {

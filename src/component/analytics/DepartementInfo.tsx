@@ -15,6 +15,8 @@ const DepartementInfo: React.FC<DepartementInfoProps> = props => {
   //TODO: Add Way to download the data
   const departement = departementInfo();
 
+  //  const [state, dispatch] = React.useReducer(reducer, initialState, init);
+
   const svgRef = React.useMemo(() => React.createRef<SVGSVGElement>(), []);
 
   React.useEffect(() => {
@@ -89,6 +91,8 @@ const DepartementInfo: React.FC<DepartementInfoProps> = props => {
         .attr('fill', (_, index) => colors[index]);
     }
   }, [svgRef]);
+
+  //const agentClickHandle = React.useCallback(() => {});
 
   return (
     <Row style={{ height: '100vh', width: '100%' }} className="departement-info-sub-container">

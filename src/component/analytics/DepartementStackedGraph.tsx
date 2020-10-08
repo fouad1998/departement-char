@@ -181,9 +181,9 @@ const DepartementStackedGraph: React.FC<DepartementStackedGraphProps> = () => {
             this.setAttribute('stroke', 'black');
             this.setAttribute('stroke-width', '2');
 
-            const mouseCoord = this.getBoundingClientRect();
-            const mouseX = mouseCoord.x;
-            const mouseY = mouseCoord.y;
+            const mouseCoord = d3.mouse(this);
+            const mouseX = mouseCoord[0];
+            const mouseY = mouseCoord[1];
 
             const departementName = this.getAttribute('departement-name') as string;
             const departementUnanswered = this.getAttribute('departement-unanswered') as string;
