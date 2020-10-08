@@ -1,7 +1,7 @@
 import { Row, Col, Select } from 'antd';
 import * as React from 'react';
 import * as d3 from 'd3';
-import { getRandomDataDepartement, departementState, roundToHumainValue, selectMax } from '../../utils/func';
+import { getRandomDataDepartement, departementState, roundToHumainValue, selectMax, selectElementAccumulate, selectElement } from '../../utils/func';
 import '../../scss/departementStack.scss';
 import { departementStackedGraphReducer } from './reducer';
 import DepartementInfo from './DepartementInfo';
@@ -84,14 +84,11 @@ const DepartementStackedGraph: React.FC<DepartementStackedGraphProps> = () => {
       const dimesion = svg.getBoundingClientRect();
 
       // Max value in dataset
-      const maxs = [
-        d3.max(departementsState, (departement: departementState) => departement.answeredChat),
-        d3.max(departementsState, (departement: departementState) => departement.unansweredChat),
-        d3.max(departementsState, (departement: departementState) => departement.transferredChat),
-        d3.max(departementsState, (departement: departementState) => departement.missedChat),
-      ];
-
-      const yMax = d3.max(maxs as number[]) as number;
+      const firstMax = d3.max(departementsState, (departement: departementState) => departement.answeredChat) as number;
+      const secondMax = d3.max(departementsState, (departement: departementState) => departement.unansweredChat) as number;
+      const thirdMax = d3.max(departementsState, (departement: departementState) => departement.transferredChat) as number;
+      const fourthMax = d3.max(departementsState, (departement: departementState) => departement.missedChat) as number;
+      const yMax = firstMax + secondMax + thirdMax + fourthMax;
 
       // Domains
       const drawWidth = width - padding.left - padding.right - margin.left * departementsState.length - margin.right * departementsState.length;
@@ -143,21 +140,24 @@ const DepartementStackedGraph: React.FC<DepartementStackedGraphProps> = () => {
       infoGroup.attr('transform', `translate(${padding.left + rectInfo.groupLeft}, ${padding.top + rectInfo.groupTop})`).attr('font-size', '10');
 
       const groupStacksD3 = svgD3Selection.append('g').attr('transform', `translate(${padding.left}, 0)`);
-      for (let n = 0; n < 4; ++n) {
-        infoGroup
-          .append('rect')
-          .attr('x', n * (rectInfo.width + rectInfo.titleWidth + rectInfo.titleMarignLeft))
-          .attr('width', rectInfo.width)
-          .attr('height', rectInfo.height)
-          //@ts-ignore
-          .attr('fill', colors[rectContent[n].key] as string);
-        infoGroup
-          .append('text')
-          .attr('x', (n + 1) * (rectInfo.width + rectInfo.titleMarignLeft) + n * rectInfo.titleWidth)
-          .attr('y', rectInfo.titleMarginTop)
-          //@ts-ignore
-          .attr('fill', colors[rectContent[n].key] as string)
-          .text(rectContent[n].title);
+      const numberOfProperty = 4;
+      for (let n = 0; n <= numberOfProperty; ++n) {
+        if (n !== numberOfProperty) {
+          infoGroup
+            .append('rect')
+            .attr('x', n * (rectInfo.width + rectInfo.titleWidth + rectInfo.titleMarignLeft))
+            .attr('width', rectInfo.width)
+            .attr('height', rectInfo.height)
+            //@ts-ignore
+            .attr('fill', colors[rectContent[n].key] as string);
+          infoGroup
+            .append('text')
+            .attr('x', (n + 1) * (rectInfo.width + rectInfo.titleMarignLeft) + n * rectInfo.titleWidth)
+            .attr('y', rectInfo.titleMarginTop)
+            //@ts-ignore
+            .attr('fill', colors[rectContent[n].key] as string)
+            .text(rectContent[n].title);
+        }
 
         groupStacksD3
           .selectAll(`rect.max-level-${n}`)
@@ -166,25 +166,28 @@ const DepartementStackedGraph: React.FC<DepartementStackedGraphProps> = () => {
           .append('rect')
           .attr('x', (_: any, index: number) => index * xScale.bandwidth() + margin.left * (index + 1) + margin.right * index)
           //@ts-ignore
-          .attr('y', d => (height - padding.bottom - yScale(selectMax(d, n, colors).value as number)) as number)
+          .attr('y', d => {
+            const base = height - padding.bottom;
+            const index = n === numberOfProperty ? numberOfProperty - 1 : n;
+            const heightOfBar = yScale(selectElementAccumulate(d, index, colors).value) as number;
+            return base - heightOfBar;
+          })
           .attr('width', xScale.bandwidth())
-          .attr('height', (d: departementState) => yScale(selectMax(d, n, colors).value as number) as number)
-          .attr('fill', (d: departementState) => selectMax(d, n, colors).color)
+          .attr('height', (d: departementState) => {
+            const index = n === numberOfProperty ? numberOfProperty - 1 : n;
+            console.log(index);
+            const barAccumulate = yScale(selectElementAccumulate(d, index, colors).value) as number;
+            const previousAccumulate = n > 0 && n < numberOfProperty ? (yScale(selectElementAccumulate(d, n - 1, colors).value) as number) : 0;
+            return barAccumulate - previousAccumulate;
+          })
+          .attr('fill', (d: departementState) => (n === numberOfProperty ? 'transparent' : selectElement(d, n, colors).color))
           .attr('departement-name', d => d.name)
           .attr('departement-unanswered', d => d.unansweredChat)
           .attr('departement-answered', d => d.answeredChat)
-          .attr('departement-missed', d => d.unansweredChat)
+          .attr('departement-missed', d => d.missedChat)
           .attr('departement-transferred', d => d.transferredChat)
-          .attr('departement-active-bar', d => selectMax(d, n, colors).key)
+          .attr('departement-active-bar', d => (n === numberOfProperty ? '' : selectElement(d, n, colors).key))
           .on('mouseover', function () {
-            //make indicator of highlighting
-            this.setAttribute('stroke', 'black');
-            this.setAttribute('stroke-width', '2');
-
-            const mouseCoord = d3.mouse(this);
-            const mouseX = mouseCoord[0];
-            const mouseY = mouseCoord[1];
-
             const departementName = this.getAttribute('departement-name') as string;
             const departementUnanswered = this.getAttribute('departement-unanswered') as string;
             const departementAnswered = this.getAttribute('departement-answered') as string;
@@ -213,17 +216,30 @@ const DepartementStackedGraph: React.FC<DepartementStackedGraphProps> = () => {
               },
             });
 
-            tooltip!.style.top = `${mouseY + 10}px`;
-            tooltip!.style.left = `${mouseX}px`;
+            if (n === numberOfProperty) {
+              //make indicator of highlighting
+              this.setAttribute('stroke', 'black');
+              this.setAttribute('stroke-width', '2');
+            }
+
             tooltip!.style.display = 'block';
           })
           .on('mousemove', function () {
-            const mouseCoord = this.getBoundingClientRect();
-            const mouseX = mouseCoord.x;
-            const mouseY = mouseCoord.y;
+            // SVG DOM Dimension
+            const dimension = svg.getBoundingClientRect();
 
-            tooltip!.style.top = `${mouseY + 10}px`;
-            tooltip!.style.left = `${mouseX + 40}px`;
+            // scale in DOM mouse coord
+            const xScaleMouseCoord = dimension.width / width;
+            const yScaleMouseCoord = dimension.height / height;
+
+            const mouseCoord = d3.mouse(this);
+            let mouseX = this.getBoundingClientRect().x - dimension.x;
+            mouseX = mouseX > dimension.width - 250 ? mouseX - 300 : mouseX;
+
+            const mouseY = mouseCoord[1];
+
+            tooltip!.style.top = `${mouseY * yScaleMouseCoord - 20}px`;
+            tooltip!.style.left = `${mouseX + xAxisScale.bandwidth() * xScaleMouseCoord}px`;
           })
           .on('mouseout', function () {
             this.setAttribute('stroke-width', '0');
@@ -250,7 +266,7 @@ const DepartementStackedGraph: React.FC<DepartementStackedGraphProps> = () => {
               },
             });
           })
-          .classed(`max-level-${n}`, true);
+          .classed(`max-level-${n} ` + (n === -1 ? 'container' : ''), true);
       }
     }
 
@@ -273,7 +289,7 @@ const DepartementStackedGraph: React.FC<DepartementStackedGraphProps> = () => {
     <Row>
       <Col span={18}>
         <svg ref={svgRef} style={{ height: '100%', width: '100%' }} viewBox="0 0 500 300"></svg>
-        <div id="tooltip" ref={tooltipRef}></div>
+        <div className="tooltip" ref={tooltipRef}></div>
       </Col>
       <Col span={6} style={{ height: 'inherit', padding: '10px 15px 10px 10px' }}>
         <Row style={{ height: '100%' }}>
@@ -317,7 +333,7 @@ const DepartementStackedGraph: React.FC<DepartementStackedGraphProps> = () => {
         </Row>
       </Col>
       {state.seeDepartementInfo && (
-        <div className="departement-info-properties-container">
+        <div className="departement-container">
           <div className="margin" onClick={returnMainScreen}></div>
           <DepartementInfo departementID={'dzad'} returnMainScreen={returnMainScreen} />
         </div>
