@@ -36,9 +36,8 @@ div.tooltip {
   display: none;
   background: white !important;
   z-index: 10;
-  padding: 10px;
   border-radius: 4px;
-  box-shadow: 0 0 5px rgba(32, 32, 32, 0.836);
+  box-shadow: 0 0 8px rgba(32, 32, 32, 0.836);
 
   #departement-name {
     font-size: 14px;
@@ -58,6 +57,66 @@ div.tooltip {
       &.active {
         background: rgba(1, 255, 56, 0.836);
       }
+    }
+  }
+
+  #agent-tooltip {
+    width: 200px;
+
+    #agent-name {
+      padding: 5px 6px;
+      font-variant-caps: all-petite-caps;
+      font-weight: 600;
+      font-size: large;
+      text-align: center;
+      position: relative;
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 90%;
+        left: 38%; //calc(50% - 40px);
+        width: 45px;
+        height: 2px;
+        box-sizing: border-box;
+        border-radius: 3px;
+        background: #4fc3f7;
+      }
+    }
+
+    #splitter {
+      font-size: large;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #4fc3f7;
+      width: 20px;
+    }
+
+    #hr {
+      height: 4px;
+      width: 100%;
+      border: none;
+      background: #4fc3f7;
+      border-radius: 3px;
+    }
+
+    #starts,
+    #ends {
+      display: flex;
+      flex: 1;
+      justify-content: center;
+      align-items: center;
+      font-weight: 600;
+      font-variant-caps: all-petite-caps;
+      font-size: large;
+    }
+
+    #agent-working-info {
+      display: flex;
+      justify-content: space-around;
+      padding: 10px;
+      font-size: medium;
     }
   }
 }
@@ -279,6 +338,228 @@ div.tooltip {
 
     & svg {
       width: 100%;
+    }
+  }
+}
+
+.departement-container {
+  .agent-container {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    height: 100vh;
+    max-height: 100vh;
+    min-height: 100vh;
+    width: 100vw;
+    max-width: 100vw;
+    min-width: 100vw;
+    z-index: 3;
+    display: flex;
+
+    & .margin {
+      width: 35vw;
+      max-width: 50vw;
+      background: #bdbdbd8f;
+    }
+
+    & .agent-info-container {
+      width: 65vw;
+      background: #e0e0e0;
+      padding: 0 20px;
+
+      & .agent-bar {
+        height: 70px;
+        width: 100%;
+        min-width: 100%;
+        max-width: 100%;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        background: white;
+
+        & svg {
+          color: #1565c0;
+          font-size: 30px;
+          margin-left: 20px;
+        }
+      }
+
+      & .agent-info-sub-container {
+        margin: 40px 0;
+        background: white;
+
+        & .agent-title {
+          font-size: large;
+          font-variant-caps: all-petite-caps;
+          background: #bdbdbd;
+          padding-left: 20px;
+          display: flex;
+          align-items: center;
+          font-weight: bold;
+        }
+
+        & .agent-rates {
+          padding: 10px 10px 0 20px;
+          margin-bottom: 10px;
+          & .rate-attribute {
+            & .unit {
+              font-weight: bold;
+              font-size: medium;
+              position: relative;
+              display: flex;
+              justify-content: flex-end;
+
+              &.with-metric {
+                display: block;
+              }
+
+              & .metric {
+                font-size: x-small;
+                font-variant-caps: all-petite-caps;
+                position: absolute;
+                bottom: 10px;
+              }
+            }
+
+            & .icon {
+              display: flex;
+            }
+          }
+        }
+
+        & .agent-attributes {
+          padding: 0 10px;
+          margin: 10px 0;
+
+          & .agent-attribute {
+            & .icon {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              font-size: medium;
+              & .help {
+                width: 40px;
+                position: relative;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                cursor: pointer;
+
+                &:hover {
+                  color: #4fc3f7;
+                }
+
+                &:hover .help-content {
+                  display: block;
+                  color: black;
+                }
+
+                & .help-content {
+                  position: absolute;
+                  left: -60px;
+                  right: -60px;
+                  padding: 7px 10px;
+                  background: #eeeeee;
+                  border-radius: 3px;
+                  bottom: calc(100% + 5px);
+                  font-size: 13px;
+                  text-align: center;
+                  box-shadow: 0 0 7px rgba(51, 51, 51, 0.452);
+                  display: none;
+                  z-index: 100;
+                  font-weight: 600;
+
+                  &::before {
+                    content: '';
+                    border: 2px solid #eee;
+                    transform: rotate(45deg);
+                    width: 8px;
+                    height: 8px;
+                    background: inherit;
+                    position: absolute;
+                    top: calc(100% - 4px);
+                    left: calc(50% - 4px);
+                  }
+                }
+              }
+            }
+
+            & .value {
+              font-weight: 600;
+              font-size: small;
+              display: flex;
+              justify-content: flex-start;
+              align-items: center;
+            }
+
+            & .progress {
+              font-size: small;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              position: relative;
+              padding-right: 2px;
+
+              & .percent {
+                font-size: x-small;
+              }
+            }
+          }
+        }
+
+        & .agent-switcher {
+          padding: 0 5px;
+
+          & .title {
+            font-size: medium;
+            font-weight: 600;
+            font-variant-caps: all-petite-caps;
+          }
+
+          & .switcher {
+            width: 100%;
+          }
+        }
+
+        & .buttons-switcher {
+          padding: 0 5px;
+          display: flex;
+          align-items: center;
+
+          & .ant-row {
+            width: 100%;
+          }
+
+          & .button-switcher {
+            font-size: medium;
+            font-weight: 600;
+            font-variant-caps: all-petite-caps;
+            position: relative;
+            width: 90%;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+
+            & .agent-name {
+              font-size: x-small;
+              position: absolute;
+              bottom: 18px;
+              right: 3px;
+            }
+          }
+        }
+
+        & .more-details-container {
+          font-weight: 600;
+          font-variant-caps: all-petite-caps;
+          font-size: medium;
+          margin-top: 10px;
+          padding: 10px;
+        }
+      }
     }
   }
 }

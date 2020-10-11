@@ -16,15 +16,15 @@ export interface agentInformationInterface {
   readonly unansweredChat: number;
   readonly transferredChat: number;
   readonly missedChat: number;
-  // readonly wroteMessages: number;
-  // readonly feedback: number;
-  // readonly averageReply: number;
-  // readonly averageWorkingTime: number;
-  // readonly videoCalls: number;
-  // readonly audioCalls: number;
-  // readonly rejectedVideoCalls: number;
-  // readonly rejectedAudioCalls: number;
-  // readonly workingTime: Array<{ startTime: number; endTime: number }>;
+  readonly wroteMessages: number;
+  readonly feedback: number;
+  readonly averageReply: number;
+  readonly averageWorkingTime: number;
+  readonly videoCalls: number;
+  readonly audioCalls: number;
+  readonly rejectedVideoCalls: number;
+  readonly rejectedAudioCalls: number;
+  readonly workingTime: Array<{ startTime: number; endTime: number }>;
 }
 
 export function getRandomDataDepartement(quantity: number): departementState[] {
@@ -46,10 +46,10 @@ export function departementInfo(): departementState {
       .fill(0)
       .map(() => String.fromCharCode(Math.floor(65 + 25 * Math.random())))
       .join(''),
-    answeredChat: Math.round(Math.random() * 0xfffffff),
-    unansweredChat: Math.round(Math.random() * 0xfffffff),
-    transferredChat: Math.round(Math.random() * 0xfffffff),
-    missedChat: Math.round(Math.random() * 0xfffffff),
+    answeredChat: Math.round(Math.random() * 0xffff),
+    unansweredChat: Math.round(Math.random() * 0xffff),
+    transferredChat: Math.round(Math.random() * 0xffff),
+    missedChat: Math.round(Math.random() * 0xffff),
     departementSize,
     agents: new Array(departementSize).fill(agentInfo()).map(() => agentInfo()),
   };
@@ -63,11 +63,42 @@ export function agentInfo(): agentInformationInterface {
       .join(''),
     answered: Math.floor(Math.random() * 0xffff),
     assigned: Math.floor(Math.random() * 0xffff),
-    answeredChat: Math.round(Math.random() * 0xfffff),
-    unansweredChat: Math.round(Math.random() * 0xfffff),
-    transferredChat: Math.round(Math.random() * 0xfffff),
+    answeredChat: Math.round(Math.random() * 0xffff),
+    unansweredChat: Math.round(Math.random() * 0xffff),
+    transferredChat: Math.round(Math.random() * 0xffff),
     missedChat: Math.round(Math.random() * 0xffff),
+    audioCalls: Math.round(Math.random() * 0xffff),
+    averageReply: Math.round(Math.random() * 0xffff),
+    averageWorkingTime: Math.round(Math.random() * 0xffff),
+    feedback: Math.round(Math.random() * 0x5),
+    rejectedAudioCalls: Math.round(Math.random() * 0xffff),
+    rejectedVideoCalls: Math.round(Math.random() * 0xffff),
+    videoCalls: Math.round(Math.random() * 0xffff),
+    workingTime: fillRandomAvaibility(),
+    wroteMessages: Math.round(Math.random() * 0xffff),
   };
+}
+
+export function fillRandomAvaibility(): Array<{ startTime: number; endTime: number }> {
+  const records = [];
+  let start = 0;
+  while (start < 23 * 3600) {
+    const range = { startTime: start, endTime: getNextTimeStamp(start) };
+    records.push(range);
+    if (start < 23 * 3600) {
+      start = getNextTimeStamp(range.endTime);
+    }
+  }
+  return records;
+}
+
+function getNextTimeStamp(timestampStart: number): number {
+  const seconds = 3600 * 5;
+  const timestamp = Math.floor(timestampStart + Math.random() * seconds);
+  if (timestamp > 24 * 3600) {
+    return getNextTimeStamp(timestampStart);
+  }
+  return timestamp;
 }
 
 export const selectMax = (departState: departementState, index: number, colors: any) => {
@@ -108,9 +139,15 @@ export const selectElementAccumulate = (departState: departementState | agentInf
 export const roundToHumainValue = (n: number): number => {
   let power = 1;
   while (n / Math.pow(10, power) > 1) ++power;
-  let humain = Math.pow(10, power);
-  while (humain / 2 > n) {
-    humain /= 2;
-  }
+  const coefficient = Math.pow(10, power) / 10;
+  let humain = coefficient;
+  while (humain < n) humain += coefficient;
   return humain;
+};
+
+export const refactorNumber = (n: number) => (n < 10 ? '0' + n : n);
+export const timeHumainForm = (seconds: number) => {
+  const hours = (seconds - (seconds % 3600)) / 3600;
+  const minutes = (seconds - hours * 3600 - ((seconds - hours * 3600) % 60)) / 60;
+  return `${refactorNumber(hours)}:${refactorNumber(minutes)}`;
 };

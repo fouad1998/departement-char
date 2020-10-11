@@ -5,6 +5,7 @@ import React from 'react';
 import { agentInformationInterface, departementInfo, roundToHumainValue, selectElement, selectElementAccumulate } from '../../utils/func';
 import * as d3 from 'd3';
 import { agentInfoReducer } from './reducer';
+import AgentInfo from './AgentInfo';
 
 export interface DepartementInfoProps {
   readonly departementID: string;
@@ -256,27 +257,17 @@ const DepartementInfo: React.FC<DepartementInfoProps> = props => {
           .on('mouseout', function () {
             this.setAttribute('stroke-width', '0');
             tooltip!.style.display = '';
-            // dispatch({
-            //   type: 'SET_ALL',
-            //   value: {
-            //     transferredChat: '',
-            //     unansweredChat: '',
-            //     answeredChat: '',
-            //     missedChat: '',
-            //     departementName: '',
-            //     hover: false,
-            //   },
-            // });
           })
           .on('click', function () {
-            //TODO: ADD THE DEPARTEMENT ID
-            // dispatch({
-            //   type: 'SET_SELECTED_DEPARTEMENT',
-            //   value: {
-            //     seeDepartementInfo: true,
-            //     departementID: '',
-            //   },
-            // });
+            console.log('Clicked on bar');
+            //TODO: ADD THE Agent ID
+            dispatch({
+              type: 'SET_ALL',
+              value: {
+                displayAgentInfo: true,
+                agentID: '',
+              },
+            });
           })
           .classed(`max-level-${n} ` + (n === -1 ? 'container' : ''), true);
       }
@@ -404,6 +395,15 @@ const DepartementInfo: React.FC<DepartementInfoProps> = props => {
           </Col>
         </Row>
       </Col>
+      {/** Agent Information Tab */}
+      {state.displayAgentInfo && (
+        <div className="agent-container">
+          <div className="margin"></div>
+          <div className="agent-info-container">
+            <AgentInfo />
+          </div>
+        </div>
+      )}
     </Row>
   );
 };

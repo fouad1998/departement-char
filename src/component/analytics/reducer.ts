@@ -44,7 +44,7 @@ export const departementStackedGraphReducer = (
 export const agentInfoReducer = (state: agentSelection, action: any): agentSelection => {
   switch (action.type) {
     case 'SET_ALL':
-      return { ...state, ...action.action };
+      return { ...state, ...action.value };
     default:
       return state;
   }
